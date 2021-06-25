@@ -11,4 +11,5 @@ install:
   - yarn
 
 script:
-  - xvfb-run --server-args="-screen 0 1920x1080x24" npm test
+  - cd packages/rrweb-snapshot && npm run prepack && npm run test
+  - cd ../rrweb && xvfb-run --server-args="-screen 0 1920x1080x24" npm test  
