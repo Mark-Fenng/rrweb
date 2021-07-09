@@ -1,6 +1,5 @@
 import { rebuild, buildNodeWithSN, INode, NodeType } from 'rrweb-snapshot';
 import * as mittProxy from 'mitt';
-import { polyfill as smoothscrollPolyfill } from './smoothscroll';
 import { Timer } from './timer';
 import { createPlayerService, createSpeedService } from './machine';
 import {
@@ -41,9 +40,16 @@ import {
   hasShadowRoot,
 } from '../utils';
 import getInjectStyleRules from './styles/inject-style';
-import './styles/style.css';
-import { RRDocument } from '../rrdom/tree-node';
-import { printRRDom } from '../rrdom';
+import { RRDocument, RRElement, RRNode } from './tree-node';
+// import './styles/style.css';
+import { printRRDom } from './index';
+const rrdom = new RRDocument();
+(() => {
+  rrdom.appendChild(rrdom.createElement('html'));
+  rrdom.documentElement.appendChild(rrdom.createElement('head'));
+  rrdom.documentElement.appendChild(rrdom.createElement('body'));
+})();
+export var document = (rrdom as unknown) as Document;
 
 const SKIP_TIME_THRESHOLD = 10 * 1000;
 const SKIP_TIME_INTERVAL = 5 * 1000;
@@ -95,8 +101,6 @@ export class Replayer {
   private firstPlayedEvent: eventWithTime | null = null;
 
   private newDocumentQueue: addedNodeMutation[] = [];
-
-  private rrDocument: RRDocument = new RRDocument();
 
   constructor(
     events: Array<eventWithTime | string>,
@@ -221,8 +225,6 @@ export class Replayer {
         this.iframe.contentWindow!.scrollTo(
           (firstFullsnapshot as fullSnapshotEvent).data.initialOffset,
         );
-        this.rrDocument.buildFromDom(this.iframe.contentDocument!);
-        printRRDom(this.rrDocument);
       }, 1);
     }
   }
@@ -390,12 +392,11 @@ export class Replayer {
     this.disableInteract();
     this.wrapper.appendChild(this.iframe);
     if (this.iframe.contentWindow && this.iframe.contentDocument) {
-      smoothscrollPolyfill(
-        this.iframe.contentWindow,
-        this.iframe.contentDocument,
-      );
-
-      polyfill(this.iframe.contentWindow as Window & typeof globalThis);
+      // smoothscrollPolyfill(
+      //   this.iframe.contentWindow,
+      //   this.iframe.contentDocument,
+      // );
+      // polyfill(this.iframe.contentWindow as Window & typeof globalThis);
     }
   }
 
@@ -492,20 +493,20 @@ export class Replayer {
         castFn();
       }
 
-      for (const plugin of this.config.plugins || []) {
-        plugin.handler(event, isSync, { replayer: this });
-      }
+      // for (const plugin of this.config.plugins || []) {
+      //   plugin.handler(event, isSync, { replayer: this });
+      // }
 
       this.service.send({ type: 'CAST_EVENT', payload: { event } });
 
       // events are kept sorted by timestamp, check if this is the last event
-      let last_index = this.service.state.context.events.length - 1;
-      if (event === this.service.state.context.events[last_index]) {
+      if (
+        event ===
+        this.service.state.context.events[
+          this.service.state.context.events.length - 1
+        ]
+      ) {
         const finish = () => {
-          if (last_index < this.service.state.context.events.length - 1) {
-            // more events have been added since the setTimeout
-            return;
-          }
           this.backToNormal();
           this.service.send('END');
           this.emitter.emit(ReplayerEvents.Finish);
@@ -588,9 +589,9 @@ export class Replayer {
         'html.rrweb-paused * { animation-play-state: paused !important; }',
       );
     }
-    for (let idx = 0; idx < injectStylesRules.length; idx++) {
-      (styleEl.sheet! as CSSStyleSheet).insertRule(injectStylesRules[idx], idx);
-    }
+    // for (let idx = 0; idx < injectStylesRules.length; idx++) {
+    //   (styleEl.sheet! as CSSStyleSheet).insertRule(injectStylesRules[idx], idx);
+    // }
   }
 
   private attachDocumentToIframe(
@@ -1380,7 +1381,7 @@ export class Replayer {
 
     this.mouse.style.left = `${_x}px`;
     this.mouse.style.top = `${_y}px`;
-    this.drawMouseTail({ x: _x, y: _y });
+    // this.drawMouseTail({ x: _x, y: _y });
     this.hoverElements((target as Node) as Element);
   }
 
@@ -1424,6 +1425,7 @@ export class Replayer {
     this.iframe.contentDocument
       ?.querySelectorAll('.\\:hover')
       .forEach((hoveredEl) => {
+        console.log(hoveredEl.toString());
         hoveredEl.classList.remove(':hover');
       });
     let currentEl: Element | null = el;

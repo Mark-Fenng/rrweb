@@ -23,6 +23,7 @@ import {
   NodeType,
   isShadowRoot,
 } from 'rrweb-snapshot';
+import { RRNode } from './rrdom/tree-node';
 
 export function on(
   type: string,
@@ -610,11 +611,11 @@ export type AppendedIframe = {
 };
 
 export function isIframeINode(
-  node: INode | ShadowRoot,
+  node: INode | ShadowRoot | RRNode,
 ): node is HTMLIFrameINode {
   if ('__sn' in node) {
     return (
-      node.__sn.type === NodeType.Element && node.__sn.tagName === 'iframe'
+      node.__sn?.type === NodeType.Element && node.__sn.tagName === 'iframe'
     );
   }
   // node can be document fragment when using the virtual parent feature
@@ -623,7 +624,7 @@ export function isIframeINode(
 
 export function getBaseDimension(
   node: Node,
-  rootIframe: Node,
+  rootIframe: Node|RRNode,
 ): DocumentDimension {
   const frameElement = node.ownerDocument?.defaultView?.frameElement;
   if (!frameElement || frameElement === rootIframe) {

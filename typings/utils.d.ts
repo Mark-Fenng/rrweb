@@ -1,5 +1,6 @@
 import { Mirror, throttleOptions, listenerHandler, hookResetter, blockClass, eventWithTime, addedNodeMutation, removedNodeMutation, textMutation, attributeMutation, mutationData, scrollData, inputData, DocumentDimension } from './types';
 import { INode, serializedNodeWithId } from 'rrweb-snapshot';
+import { RRNode } from './rrdom/tree-node';
 export declare function on(type: string, fn: EventListenerOrEventListenerObject, target?: Document | Window): listenerHandler;
 export declare function createMirror(): Mirror;
 export declare let _mirror: Mirror;
@@ -61,8 +62,8 @@ export declare type AppendedIframe = {
     mutationInQueue: addedNodeMutation;
     builtNode: HTMLIFrameINode;
 };
-export declare function isIframeINode(node: INode | ShadowRoot): node is HTMLIFrameINode;
-export declare function getBaseDimension(node: Node, rootIframe: Node): DocumentDimension;
+export declare function isIframeINode(node: INode | ShadowRoot | RRNode): node is HTMLIFrameINode;
+export declare function getBaseDimension(node: Node, rootIframe: Node | RRNode): DocumentDimension;
 export declare function hasShadowRoot<T extends Node>(n: T): n is T & {
     shadowRoot: ShadowRoot;
 };

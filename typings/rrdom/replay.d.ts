@@ -1,7 +1,7 @@
 import { Timer } from './timer';
 import { createPlayerService, createSpeedService } from './machine';
 import { eventWithTime, playerConfig, playerMetaData, Handler, Mirror } from '../types';
-import './styles/style.css';
+export declare var document: Document;
 export declare class Replayer {
     wrapper: HTMLDivElement;
     iframe: HTMLIFrameElement;
@@ -22,7 +22,6 @@ export declare class Replayer {
     private mirror;
     private firstPlayedEvent;
     private newDocumentQueue;
-    private rrDocument;
     constructor(events: Array<eventWithTime | string>, config?: Partial<playerConfig>);
     on(event: string, handler: Handler): this;
     off(event: string, handler: Handler): this;
